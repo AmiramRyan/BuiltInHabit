@@ -1,0 +1,9 @@
+frontend/BuiltInHabit.Frontend/node_modules/
+frontend/BuiltInHabit.Frontend/build/
+frontend/BuiltInHabit.Frontend/dist/
+backend/BuiltInHabit.Backend/bin/
+backend/BuiltInHabit.Backend/obj/
+.vs/
+*.log
+.DS_Store  # macOS
+Thumbs.db  # Windows
