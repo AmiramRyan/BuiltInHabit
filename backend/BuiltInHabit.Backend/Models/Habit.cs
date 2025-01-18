@@ -1,20 +1,35 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace BuiltInHabit.Backend.Models;
-public class Habit
+
+namespace BuiltInHabit.Backend.Models
 {
-    //What dose this object consist of?
+    public class Habit
+    {
+        public enum Frequency { Daily, Weekly, Monthly }
 
-    [BsonId] // MongoDB will automatically generate a unique Id for each document.
-    public ObjectId Id { get; set; }
+        [BsonId]
+        public ObjectId Id { get; set; }
 
-    [BsonElement("name")]
-    public string Name { get; set; } = string.Empty;
+        [BsonElement("Name")]
+        [BsonRequired]
+        public string Name { get; set; }
 
-    [BsonElement("description")]
-    public string Description { get; set; } = string.Empty;
+        [BsonElement("Description")]
+        public string Description { get; set; } = string.Empty;
 
-    [BsonElement("completed")]
-    public bool Completed { get; set; }
+        [BsonElement("Completed")]
+        public bool Completed { get; set; } = false;
 
+        [BsonElement("UserId")]
+        [BsonRequired]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string UserId { get; set; }
+
+        [BsonElement("HabitFrequency")]
+
+        [BsonRepresentation(BsonType.String)]
+        public Frequency HabitFrequency { get; set; } = Frequency.Daily;
+
+        
+    }
 }

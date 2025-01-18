@@ -1,13 +1,14 @@
-﻿using BuiltInHabit.Backend.Models;
+﻿using BuiltInHabit.Backend.DTOs;
+using BuiltInHabit.Backend.Models;
 using BuiltInHabit.Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using MongoDB.Bson;
+using System.Security.Claims;
+using static BuiltInHabit.Backend.Models.Habit;
 
 namespace BuiltInHabit.Backend.Controllers
 {
-    //Define the swagger CRUD Operations
-    [Route("api/[controller]")]
+    [Route("api/habits")]
     [ApiController]
     public class HabitController : ControllerBase
     {
@@ -18,55 +19,55 @@ namespace BuiltInHabit.Backend.Controllers
             _habitService = habitService;
         }
 
-        // GET: api/Habit
-        [HttpGet]
-        public async Task<ActionResult<List<Habit>>> GetHabits()
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateHabit([FromBody] Habit habit)
         {
-            return await _habitService.GetHabitsAsync();
+            if (string.IsNullOrWhiteSpace(habit.Name) || string.IsNullOrWhiteSpace(habit.UserId)) 
+            {
+                return BadRequest("Habit name and UserId is required.");
+            }
+            habit.Completed = false;
+            habit.HabitFrequency = 0;
+            var createdHabit = await _habitService.CreateHabitAsync(habit);
+            return Ok(new { message = "Habit created successfully", habit = createdHabit });
         }
 
-        // GET: api/Habit/{id}
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetHabitsByUserId(string userId)
+        {
+            if (!ObjectId.TryParse(userId, out _)) { return BadRequest("Invalid UserId format"); }
+            var habits = await _habitService.GetHabitsByUserIdAsync(userId);
+            return Ok(habits);
+        }
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<Habit>> GetHabitById(string id)
+        public async Task<IActionResult> GetHabitById(ObjectId id)
         {
             var habit = await _habitService.GetHabitByIdAsync(id);
-            if (habit == null)
-            {
-                return NotFound();
-            }
-            return habit;
+            if (habit == null) return NotFound();
+            return Ok(habit);
         }
 
-        // POST: api/Habit
-        [HttpPost]
-        public async Task<ActionResult<Habit>> CreateHabit(Habit habit)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateHabit(string id, [FromBody] UpdateHabitRequest request)
         {
-            var createdHabit = await _habitService.CreateHabitAsync(habit);
-            return CreatedAtAction(nameof(GetHabitById), new { id = createdHabit.Id }, createdHabit);
-        }
-
-        // PUT: api/Habit/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateHabit(string id, Habit habit)
-        {
-            var updatedHabit = await _habitService.UpdateHabitAsync(id, habit);
-            if (updatedHabit == null)
+            try
             {
-                return NotFound();
+                var succsess = await _habitService.UpdateHabitAsync(id, request.FieldName, request.NewValue);
+                if (succsess) { return Ok("Habit has been updated"); }
+                return NotFound("Habit not found");
             }
-            return NoContent();
+
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, "An error occurred while updating the habit"); }
         }
 
-        // DELETE: api/Habit/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteHabit(string id)
+        public async Task<IActionResult> DeleteHabit(ObjectId id)
         {
-            var deleted = await _habitService.DeleteHabitAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            var success = await _habitService.DeleteHabitAsync(id);
+            if (success) return NoContent();
+            return NotFound();
         }
     }
 }

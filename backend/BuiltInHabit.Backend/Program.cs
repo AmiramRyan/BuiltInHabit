@@ -18,6 +18,9 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
     return new MongoClient(mongoConnectionString);
 });
 
+// Register MongoDbContext as a service, passing IConfiguration for MongoDbContext constructor
+builder.Services.AddScoped<MongoDbContext>();
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
