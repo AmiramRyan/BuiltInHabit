@@ -28,9 +28,9 @@ namespace BuiltInHabit.Backend.Controllers
                 return BadRequest("Habit name and UserId is required.");
             }
             habit.Completed = false;
-            habit.HabitFrequency = 0;
+            habit.HabitFrequency = habit.HabitFrequency;
             var createdHabit = await _habitService.CreateHabitAsync(habit);
-            return Ok(new { message = "Habit created successfully", habit = createdHabit });
+            return Ok(new {habit = createdHabit });
         }
 
         [HttpGet("user/{userId}")]
@@ -42,7 +42,7 @@ namespace BuiltInHabit.Backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetHabitById(ObjectId id)
+        public async Task<IActionResult> GetHabitById(string id)
         {
             var habit = await _habitService.GetHabitByIdAsync(id);
             if (habit == null) return NotFound();
@@ -64,7 +64,7 @@ namespace BuiltInHabit.Backend.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteHabit(ObjectId id)
+        public async Task<IActionResult> DeleteHabit(string id)
         {
             var success = await _habitService.DeleteHabitAsync(id);
             if (success) return NoContent();

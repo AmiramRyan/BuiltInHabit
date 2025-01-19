@@ -1,43 +1,21 @@
 import axios from 'axios';
 
-const API_URL = 'https://localhost:7227/api/Habit';
-
-export const getHabits = async () => {
-  try {
-    const response = await axios.get(API_URL);
+const API_BASE_URL = 'https://localhost:7227/api/habits';
+export const createHabit = async (habit) => {
+    const response = await axios.post(`${API_BASE_URL}/create`, habit);
     return response.data;
-  } catch (error) {
-    console.error('Error fetching habits:', error);
-    throw error;
-  }
 };
 
-export const addHabit = async (habit) => {
-  try {
-    const response = await axios.post(API_URL, habit);
+export const getHabitsByUserId = async (userId) => {
+    const response = await axios.get(`${API_BASE_URL}/user/${userId}`);
     return response.data;
-  } catch (error) {
-    console.error('Error adding habit:', error);
-    throw error;
-  }
 };
 
-export const updateHabit = async (id, habit) => {
-  try {
-    const response = await axios.put(`${API_URL}/${id}`, habit);
+export const updateHabit = async (habitId, fieldName, newValue) => {
+    const response = await axios.patch(`${API_BASE_URL}/${habitId}`, { fieldName, newValue });
     return response.data;
-  } catch (error) {
-    console.error('Error updating habit:', error);
-    throw error;
-  }
 };
 
-// Ensure deleteHabit is properly exported
-export const deleteHabit = async (id) => {
-  try {
-    await axios.delete(`${API_URL}/${id}`);
-  } catch (error) {
-    console.error('Error deleting habit:', error);
-    throw error;
-  }
+export const deleteHabit = async (habitId) => {
+    await axios.delete(`${API_BASE_URL}/${habitId}`);
 };

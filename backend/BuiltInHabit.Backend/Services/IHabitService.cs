@@ -7,7 +7,7 @@ public interface IHabitService
 {
     Task<Habit> CreateHabitAsync(Habit habit);
     Task<List<Habit>> GetHabitsByUserIdAsync(string userId);
-    Task<Habit> GetHabitByIdAsync(ObjectId habitId);
+    Task<Habit> GetHabitByIdAsync(string habitId);
     Task<bool> UpdateHabitAsync(string habitId, string fieldName, string newValue);
-    Task<bool> DeleteHabitAsync(ObjectId habitId);
+    Task<bool> DeleteHabitAsync(string habitId);
 }

@@ -26,9 +26,12 @@ public class HabitService : IHabitService
         return habits;
     }
 
-    public async Task<Habit> GetHabitByIdAsync(ObjectId habitId)
+    public async Task<Habit> GetHabitByIdAsync(string habitId)
     {
-        return await _habits.Find(h => h.Id == habitId).FirstOrDefaultAsync();
+        if (!ObjectId.TryParse(habitId, out ObjectId objectId)) { throw new ArgumentException("Invalid Habit ID format"); }
+        var filter = Builders<Habit>.Filter.Eq("_id", objectId);
+        var habit = await _habits.Find(filter).FirstOrDefaultAsync();
+        return habit;
     }
 
     public async Task<bool> UpdateHabitAsync(string habitId, string fieldName, string newValue)
@@ -54,9 +57,12 @@ public class HabitService : IHabitService
     }
 
 
-    public async Task<bool> DeleteHabitAsync(ObjectId habitId)
+    public async Task<bool> DeleteHabitAsync(string habitId)
     {
-        var result = await _habits.DeleteOneAsync(h => h.Id == habitId);
+        if (!ObjectId.TryParse(habitId, out ObjectId objectId)) { throw new ArgumentException("Invalid Habit ID format"); }
+        var filter = Builders<Habit>.Filter.Eq("_id", objectId);
+        var result = await _habits.DeleteOneAsync(filter);
+
         return result.IsAcknowledged && result.DeletedCount > 0;
     }
 

@@ -8,7 +8,9 @@ namespace BuiltInHabit.Backend.Models
         public enum Frequency { Daily, Weekly, Monthly }
 
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        [BsonElement("id")]
+        public string Id { get; set; }
 
         [BsonElement("Name")]
         [BsonRequired]

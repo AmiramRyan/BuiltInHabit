@@ -26,10 +26,7 @@ namespace BuiltInHabit.Backend.Controllers
             var existingUser = await _context.Users
                 .Find(user => user.Email == request.Email)
                 .FirstOrDefaultAsync();
-            if(existingUser != null)
-            {
-                return BadRequest("User email already exists");
-            }
+            if(existingUser != null) { return BadRequest("User already exists");}
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             var user = new User
@@ -40,7 +37,7 @@ namespace BuiltInHabit.Backend.Controllers
             };
             //Save Data
             await _context.Users.InsertOneAsync(user);
-            return Ok(new { message = "User registerd successfully" });
+            return Ok(new { userId = user.Id.ToString()});
         }
 
         [HttpPost("login")]
@@ -60,7 +57,7 @@ namespace BuiltInHabit.Backend.Controllers
             {
                 return Unauthorized("Invalid credentials.");
             }
-            return Ok(new { message = "Login successful" });
+            return Ok(new { userId = user.Id.ToString()});
         }
     }
 }

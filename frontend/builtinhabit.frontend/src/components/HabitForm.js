@@ -1,53 +1,84 @@
 import React, { useState } from 'react';
-import { addHabit } from '../services/habitService';
+import { createHabit } from '../services/habitService';
+import { useNavigate } from 'react-router-dom';
 
-const HabitForm = () => {
-  const [habitName, setHabitName] = useState('');
-  const [habitDescription, setHabitDescription] = useState('');
+// Frequency mapping
+const frequencyOptions = [
+    { value: 0, label: 'Daily' },
+    { value: 1, label: 'Weekly' },
+    { value: 2, label: 'Monthly' }
+];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const HabitForm = ({ userId, showAlert }) => {
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [habitFrequency, setHabitFrequency] = useState(0);
+    const navigate = useNavigate();
 
-    if (!habitName || !habitDescription) {
-      alert('Please fill in all fields');
-      return;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    const newHabit = {
-      name: habitName,
-      description: habitDescription,
+        const habitData = {
+            id: "",
+            name,
+            description,
+            userId,
+            habitFrequency
+        };
+
+        try {
+            await createHabit(habitData);
+            showAlert('Habit created successfully!', 'success');
+            navigate('/');
+        } catch (error) {
+            console.error(error);
+            showAlert('Failed to create habit.', 'danger');
+        }
     };
 
-    try {
-      await addHabit(newHabit);
-      alert('Habit added!');
-      setHabitName('');
-      setHabitDescription('');
-    } catch (error) {
-      console.error('Error adding habit:', error);
-    }
-  };
-
-  return (
-    <div>
-      <h2>Add New Habit</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Habit Name"
-          value={habitName}
-          onChange={(e) => setHabitName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Habit Description"
-          value={habitDescription}
-          onChange={(e) => setHabitDescription(e.target.value)}
-        />
-        <button type="submit">Add Habit</button>
-      </form>
-    </div>
-  );
+    return (
+        <div>
+            <h2>Create a New Habit</h2>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Habit Name</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Description</label>
+                    <textarea
+                        className="form-control"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                    ></textarea>
+                </div>
+                <div className="form-group">
+                    <label>Frequency</label>
+                    <select
+                        className="form-control"
+                        value={habitFrequency}
+                        onChange={(e) => setHabitFrequency(Number(e.target.value))}
+                    >
+                        {frequencyOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <button type="submit" className="btn btn-primary mt-3">
+                    Create Habit
+                </button>
+            </form>
+        </div>
+    );
 };
 
 export default HabitForm;
