@@ -31,15 +31,28 @@ public class HabitService : IHabitService
         return await _habits.Find(h => h.Id == habitId).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> UpdateHabitAsync(string habitId, string fieldName, object newValue)
+    public async Task<bool> UpdateHabitAsync(string habitId, string fieldName, string newValue)
     {
-        if(!ObjectId.TryParse(habitId, out ObjectId objectId)){ throw new ArgumentException("Invalid Habit ID format"); }
+        if (!ObjectId.TryParse(habitId, out ObjectId objectId)) { throw new ArgumentException("Invalid Habit ID format");}
+
+        var updatableFields = new[] { "Name", "Description", "Completed", "HabitFrequency" };
+        if (!updatableFields.Contains(fieldName)) { throw new ArgumentException($"Field '{fieldName}' is not allowed for updates."); }
+
+        //Check fields are valid
+        if (fieldName == "Completed")
+        {
+            try { bool newCompleted = Convert.ToBoolean(newValue); }
+            catch (ArgumentException ex) { throw new ArgumentException("Only values allowed: true | false"); }
+        }
+        if ((fieldName == "Name" || fieldName == "Description") && string.IsNullOrEmpty(newValue?.ToString())){ throw new ArgumentException($"The value for '{fieldName}' cannot be null or empty."); }
+        if (fieldName == "HabitFrequency" && newValue is not string){ throw new ArgumentException("The value for 'HabitFrequency' must be a string."); }
+
         var filter = Builders<Habit>.Filter.Eq("_id", objectId);
         var update = Builders<Habit>.Update.Set(fieldName, newValue);
         var result = await _habits.UpdateOneAsync(filter, update);
-
         return result.ModifiedCount > 0;
     }
+
 
     public async Task<bool> DeleteHabitAsync(ObjectId habitId)
     {

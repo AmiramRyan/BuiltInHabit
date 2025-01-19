@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System.Security.Claims;
 using static BuiltInHabit.Backend.Models.Habit;
+using static MongoDB.Driver.WriteConcern;
 
 namespace BuiltInHabit.Backend.Controllers
 {
